@@ -10,6 +10,7 @@ import {
   FiSettings,
   FiUser,
   FiBell,
+  FiStar
 } from "react-icons/fi";
 import { useState, useEffect } from "react";
 
@@ -18,6 +19,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, title, onLogout }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [isStarred, setIsStarred] = useState(false); // State untuk status bintang
 
   useEffect(() => {
     setIsMounted(true);
@@ -30,6 +32,12 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, title, onLogout }) => {
 
   const toggleRightSidebar = () => {
     setIsRightSidebarOpen(!isRightSidebarOpen);
+  };
+
+  const handleStarClick = () => {
+    setIsStarred(!isStarred);
+    // Di sini bisa ditambahkan logika lainnya, seperti menyimpan preferensi user
+    console.log("Status bintang:", !isStarred);
   };
 
   // Hindari hydration mismatch
@@ -68,13 +76,34 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, title, onLogout }) => {
               </div>
             </button>
 
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white transition-all duration-300">
+            <h1 className='text-xl md:text-2xl font-bold transition-all duration-300 ${
+                  theme === "dark"
+                    ? "text-gray-200 hover:bg-gray-800"
+                    : "text-gray-700 hover:bg-gray-100"'>
               {title}
             </h1>
           </div>
 
           {/* Right: notifications, settings, user and logout */}
           <div className="flex items-center space-x-2 md:space-x-3">
+            {/* Tombol Toggle Theme (Bulan/Matahari) */}
+            <button
+              onClick={toggleTheme}
+              className={`relative p-2.5 rounded-xl transition-all duration-300
+                ${
+                  theme === "dark"
+                    ? "text-blue-300 hover:bg-gray-800"
+                    : "text-blue-600 hover:bg-gray-100"
+                }`}
+              aria-label="Toggle Dark Mode"
+            >
+              {theme === "dark" ? (
+                <FiMoon className="w-5 h-5" />
+              ) : (
+                <FiSun className="w-5 h-5" />
+              )}
+            </button>
+
             {/* Notifications */}
             <button
               className={`relative p-2.5 rounded-xl transition-all duration-300

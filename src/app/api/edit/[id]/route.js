@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server";
 
-export async function PUT(request) {
+export async function PUT(request, { params }) {
   try {
     const authHeader = request.headers.get("authorization");
-    const body = await request.json(); // { id, nama, jurusan }
-
     if (!authHeader) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, ...updateData } = body;
-
+    // ambil id dari URL param /api/edit/[id]
+    const { id } = params || {};
     if (!id) {
-      return NextResponse.json({ message: "ID is required" }, { status: 400 });
+      return NextResponse.json({ message: "ID param is required" }, { status: 400 });
     }
+
+    // body hanya berisi field yang diupdate
+    const updateData = await request.json(); // { nama, jurusan }
 
     const response = await fetch(
       `https://web-production-dbd6b.up.railway.app/teknisi/${id}`,
@@ -28,8 +29,9 @@ export async function PUT(request) {
     );
 
     if (!response.ok) {
+      const msg = await response.text().catch(() => "");
       return NextResponse.json(
-        { message: "Failed to update data" },
+        { message: msg || "Failed to update data" },
         { status: response.status }
       );
     }

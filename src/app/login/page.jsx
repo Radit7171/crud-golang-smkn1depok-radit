@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import useDarkMode from "@/components/DarkModeContext";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -10,31 +11,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-
-  // Deteksi preferensi dark mode sistem
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-      // Simpan preferensi di localStorage
-      const savedMode = localStorage.getItem("darkMode");
-      if (savedMode !== null) {
-        if (savedMode === "true") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-      } else {
-        if (isDark) {
-          document.documentElement.classList.add("dark");
-          localStorage.setItem("darkMode", "true");
-        } else {
-          document.documentElement.classList.remove("dark");
-          localStorage.setItem("darkMode", "false");
-        }
-      }
-    }
-  }, []);
+  const { theme, toggleTheme } = useDarkMode();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -48,7 +25,6 @@ export default function LoginPage() {
     }
 
     try {
-      // Menggunakan API route untuk menghindari CORS
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,7 +35,7 @@ export default function LoginPage() {
 
       if (res.ok) {
         localStorage.setItem("token", data.token);
-        router.push("/teknisi/tampil");
+        router.push("/teknisi/tampil/");
       } else {
         setError(
           data.message ||
@@ -74,14 +50,75 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 p-4 transition-colors duration-300">
-      <div className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+    <div
+      className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+        theme === "dark"
+          ? "bg-gradient-to-br from-gray-900 to-gray-800"
+          : "bg-gradient-to-br from-blue-50 to-indigo-100"
+      }`}
+    >
+      {/* Toggle Theme Button */}
+      <button
+        onClick={toggleTheme}
+        className={`absolute top-4 right-4 p-2 rounded-full ${
+          theme === "dark"
+            ? "bg-gray-700 text-yellow-300 hover:bg-gray-600"
+            : "bg-white text-gray-700 hover:bg-gray-100"
+        } transition-colors duration-300 shadow-md`}
+        aria-label="Toggle theme"
+      >
+        {theme === "dark" ? (
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            />
+          </svg>
+        ) : (
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            />
+          </svg>
+        )}
+      </button>
+
+      <div
+        className={`p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-md border transition-colors duration-300 ${
+          theme === "dark"
+            ? "bg-gray-800 border-gray-700"
+            : "bg-white border-gray-200"
+        }`}
+      >
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full transition-colors duration-300">
+            <div
+              className={`p-3 rounded-full transition-colors duration-300 ${
+                theme === "dark"
+                  ? "bg-blue-900/30 text-blue-300"
+                  : "bg-blue-100 text-blue-600"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10 text-blue-600 dark:text-blue-300"
+                className="h-10 w-10"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -95,17 +132,31 @@ export default function LoginPage() {
               </svg>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2 transition-colors duration-300">
+          <h1
+            className={`text-3xl font-bold mb-2 transition-colors duration-300 ${
+              theme === "dark" ? "text-white" : "text-gray-800"
+            }`}
+          >
             Selamat Datang
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">
+          <p
+            className={`transition-colors duration-300 ${
+              theme === "dark" ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
             Masuk ke akun Anda untuk melanjutkan
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-3 rounded-lg text-sm flex items-center transition-colors duration-300">
+            <div
+              className={`p-3 rounded-lg text-sm flex items-center transition-colors duration-300 ${
+                theme === "dark"
+                  ? "bg-red-900/30 text-red-300 border border-red-700"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 mr-2 flex-shrink-0"
@@ -127,7 +178,9 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300"
+              className={`block text-sm font-medium mb-1 transition-colors duration-300 ${
+                theme === "dark" ? "text-gray-300" : "text-gray-700"
+              }`}
             >
               Username
             </label>
@@ -152,7 +205,11 @@ export default function LoginPage() {
                 id="username"
                 type="text"
                 placeholder="Masukkan username Anda"
-                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pl-10 mt-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300"
+                className={`w-full p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition pl-10 mt-1 placeholder-gray-500 ${
+                  theme === "dark"
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-gray-300 text-gray-900"
+                } border`}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -163,7 +220,9 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300"
+              className={`block text-sm font-medium mb-1 transition-colors duration-300 ${
+                theme === "dark" ? "text-gray-300" : "text-gray-700"
+              }`}
             >
               Password
             </label>
@@ -188,7 +247,11 @@ export default function LoginPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Masukkan password Anda"
-                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pl-10 pr-10 mt-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300"
+                className={`w-full p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition pl-10 pr-10 mt-1 placeholder-gray-500 ${
+                  theme === "dark"
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-gray-300 text-gray-900"
+                } border`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -242,7 +305,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition disabled:opacity-50 flex items-center justify-center shadow-md dark:from-blue-700 dark:to-indigo-800 dark:hover:from-blue-800 dark:hover:to-indigo-900 transition-colors duration-300"
+            className={`w-full p-3 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition flex items-center justify-center shadow-md ${
+              isLoading
+                ? "bg-blue-400 cursor-not-allowed"
+                : theme === "dark"
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800"
+            } text-white`}
           >
             {isLoading ? (
               <>
@@ -291,11 +360,19 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-300">
+          <p
+            className={`text-sm transition-colors duration-300 ${
+              theme === "dark" ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
             Belum punya akun?{" "}
             <span
-              className="text-blue-600 dark:text-blue-400 font-medium cursor-pointer hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-300"
-              onClick={() => router.push("/pages/register")}
+              className={`font-medium cursor-pointer transition-colors duration-300 ${
+                theme === "dark"
+                  ? "text-blue-400 hover:text-blue-300"
+                  : "text-blue-600 hover:text-blue-800"
+              }`}
+              onClick={() => router.push("/register")}
             >
               Daftar di sini
             </span>
