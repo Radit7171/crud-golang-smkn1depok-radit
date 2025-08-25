@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -10,6 +10,31 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  // Deteksi preferensi dark mode sistem
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+      // Simpan preferensi di localStorage
+      const savedMode = localStorage.getItem("darkMode");
+      if (savedMode !== null) {
+        if (savedMode === "true") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } else {
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+          localStorage.setItem("darkMode", "true");
+        } else {
+          document.documentElement.classList.remove("dark");
+          localStorage.setItem("darkMode", "false");
+        }
+      }
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,20 +48,18 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await fetch(
-        "https://web-production-dbd6b.up.railway.app/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        }
-      );
+      // Menggunakan API route untuk menghindari CORS
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
       const data = await res.json();
 
       if (res.ok) {
         localStorage.setItem("token", data.token);
-        router.push("/");
+        router.push("/teknisi/tampil");
       } else {
         setError(
           data.message ||
@@ -51,14 +74,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 p-4 transition-colors duration-300">
+      <div className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-blue-100 p-3 rounded-full">
+            <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full transition-colors duration-300">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10 text-blue-600"
+                className="h-10 w-10 text-blue-600 dark:text-blue-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -72,18 +95,20 @@ export default function LoginPage() {
               </svg>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2 transition-colors duration-300">
             Selamat Datang
           </h1>
-          <p className="text-gray-600">Masuk ke akun Anda untuk melanjutkan</p>
+          <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">
+            Masuk ke akun Anda untuk melanjutkan
+          </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           {error && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm flex items-center">
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-3 rounded-lg text-sm flex items-center transition-colors duration-300">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2"
+                className="h-5 w-5 mr-2 flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -99,15 +124,15 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className="relative">
+          <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300"
             >
               Username
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-6">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5 text-gray-400"
@@ -127,7 +152,7 @@ export default function LoginPage() {
                 id="username"
                 type="text"
                 placeholder="Masukkan username Anda"
-                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pl-10 mt-1"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pl-10 mt-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -135,15 +160,15 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="relative">
+          <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300"
             >
               Password
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-6">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5 text-gray-400"
@@ -163,14 +188,14 @@ export default function LoginPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Masukkan password Anda"
-                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pl-10 pr-10 mt-1"
+                className="w-full border border-gray-300 dark:border-gray-600 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pl-10 pr-10 mt-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-300"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center mt-6"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center mt-1"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -217,7 +242,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition disabled:opacity-50 flex items-center justify-center shadow-md"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition disabled:opacity-50 flex items-center justify-center shadow-md dark:from-blue-700 dark:to-indigo-800 dark:hover:from-blue-800 dark:hover:to-indigo-900 transition-colors duration-300"
           >
             {isLoading ? (
               <>
@@ -266,10 +291,10 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 dark:text-gray-300 text-sm transition-colors duration-300">
             Belum punya akun?{" "}
             <span
-              className="text-blue-600 font-medium cursor-pointer hover:text-blue-800 transition"
+              className="text-blue-600 dark:text-blue-400 font-medium cursor-pointer hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-300"
               onClick={() => router.push("/pages/register")}
             >
               Daftar di sini
