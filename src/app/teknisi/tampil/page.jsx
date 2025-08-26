@@ -12,8 +12,10 @@ export default function Dashboard() {
   const [teknisis, setTeknisis] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const router = useRouter();
 
   const { theme } = useDarkMode();
@@ -52,6 +54,14 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = teknisis.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(teknisis.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleDelete = async (id) => {
     try {
@@ -184,9 +194,9 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Tabel Teknisi */}
+          {/* Tabel Teknisi (Desktop) */}
           <div
-            className={`shadow-lg rounded-xl overflow-hidden ${
+            className={`shadow-lg rounded-xl overflow-hidden hidden md:block ${
               theme === "dark" ? "bg-gray-800" : "bg-white"
             }`}
           >
@@ -214,229 +224,407 @@ export default function Dashboard() {
                 </p>
               </div>
             ) : (
-              <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full divide-y">
-                  <thead
-                    className={theme === "dark" ? "bg-gray-700" : "bg-gray-50"}
-                  >
-                    <tr>
-                      {["No", "Nama", "Jurusan", "Aksi"].map((head) => (
-                        <th
-                          key={head}
-                          className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                            theme === "dark" ? "text-gray-300" : "text-gray-500"
+              <>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y">
+                    <thead
+                      className={
+                        theme === "dark" ? "bg-gray-700" : "bg-gray-50"
+                      }
+                    >
+                      <tr>
+                        {["No", "Nama", "Jurusan", "Aksi"].map((head) => (
+                          <th
+                            key={head}
+                            className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                              theme === "dark"
+                                ? "text-gray-300"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {head}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody
+                      className={`divide-y ${
+                        theme === "dark"
+                          ? "divide-gray-700 bg-gray-800"
+                          : "divide-gray-200 bg-white"
+                      }`}
+                    >
+                      {currentItems.map((teknisi, index) => (
+                        <tr
+                          key={teknisi.id}
+                          className={`transition-colors ${
+                            theme === "dark"
+                              ? "hover:bg-gray-750"
+                              : "hover:bg-gray-50"
                           }`}
                         >
-                          {head}
-                        </th>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium">
+                              {indexOfFirstItem + index + 1}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium">
+                              {teknisi.nama}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm">{teknisi.jurusan}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center space-x-3">
+                              <Link
+                                href={`/teknisi/${teknisi.id}`}
+                                className={`p-2 rounded-full transition-colors ${
+                                  theme === "dark"
+                                    ? "text-indigo-400 hover:bg-indigo-900/30"
+                                    : "text-indigo-600 hover:bg-indigo-100"
+                                }`}
+                                title="Detail"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                              </Link>
+                              <Link
+                                href={`/teknisi/edit/${teknisi.id}`}
+                                className={`p-2 rounded-full transition-colors ${
+                                  theme === "dark"
+                                    ? "text-yellow-400 hover:bg-yellow-900/30"
+                                    : "text-yellow-600 hover:bg-yellow-100"
+                                }`}
+                                title="Edit"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                  />
+                                </svg>
+                              </Link>
+                              <button
+                                onClick={() => setDeleteConfirm(teknisi)}
+                                className={`p-2 rounded-full transition-colors ${
+                                  theme === "dark"
+                                    ? "text-red-400 hover:bg-red-900/30"
+                                    : "text-red-600 hover:bg-red-100"
+                                }`}
+                                title="Hapus"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
                       ))}
-                    </tr>
-                  </thead>
-                  <tbody
-                    className={`divide-y ${
-                      theme === "dark"
-                        ? "divide-gray-700 bg-gray-800"
-                        : "divide-gray-200 bg-white"
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
+            {/* Pagination Controls */}
+            {teknisis.length > itemsPerPage && (
+              <div
+                className={`px-6 py-4 border-t ${
+                  theme === "dark" ? "border-gray-700" : "border-gray-200"
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <div
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    {teknisis.map((teknisi, index) => (
-                      <tr
-                        key={teknisi.id}
-                        className={`transition-colors ${
-                          theme === "dark"
-                            ? "hover:bg-gray-750"
-                            : "hover:bg-gray-50"
-                        }`}
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium">{index + 1}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium">
-                            {teknisi.nama}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm">{teknisi.jurusan}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center space-x-3">
-                            <Link
-                              href={`/teknisi/${teknisi.id}`}
-                              className={`p-2 rounded-full transition-colors ${
-                                theme === "dark"
-                                  ? "text-indigo-400 hover:bg-indigo-900/30"
-                                  : "text-indigo-600 hover:bg-indigo-100"
-                              }`}
-                              title="Detail"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            </Link>
-                            <Link
-                              href={`/teknisi/edit/${teknisi.id}`}
-                              className={`p-2 rounded-full transition-colors ${
-                                theme === "dark"
-                                  ? "text-yellow-400 hover:bg-yellow-900/30"
-                                  : "text-yellow-600 hover:bg-yellow-100"
-                              }`}
-                              title="Edit"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                />
-                              </svg>
-                            </Link>
-                            <button
-                              onClick={() => setDeleteConfirm(teknisi)}
-                              className={`p-2 rounded-full transition-colors ${
-                                theme === "dark"
-                                  ? "text-red-400 hover:bg-red-900/30"
-                                  : "text-red-600 hover:bg-red-100"
-                              }`}
-                              title="Hapus"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    Menampilkan {indexOfFirstItem + 1} sampai{" "}
+                    {Math.min(indexOfLastItem, teknisis.length)} dari{" "}
+                    {teknisis.length} data
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === 1
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:bg-blue-500 hover:text-white"
+                      } ${
+                        theme === "dark"
+                          ? "bg-gray-700 text-gray-300"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Sebelumnya
+                    </button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <button
+                          key={page}
+                          onClick={() => paginate(page)}
+                          className={`px-3 py-1 rounded-md ${
+                            currentPage === page
+                              ? "bg-blue-500 text-white"
+                              : `${
+                                  theme === "dark"
+                                    ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      )
+                    )}
+
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === totalPages
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:bg-blue-500 hover:text-white"
+                      } ${
+                        theme === "dark"
+                          ? "bg-gray-700 text-gray-300"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Selanjutnya
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
-            {/* Card view untuk mobile */}
-            <div className="space-y-4 md:hidden">
-              {teknisis.map((teknisi, index) => (
-                <div
-                  key={teknisi.id}
-                  className={`p-4 rounded-lg shadow ${
-                    theme === "dark" ? "bg-gray-800" : "bg-white"
-                  }`}
+          </div>
+
+          {/* Card view untuk mobile - DIPINDAHKAN KE LUAR dari div tabel desktop */}
+          <div
+            className={`block md:hidden ${
+              theme === "dark" ? "bg-gray-800" : "bg-white"
+            } shadow-lg rounded-xl overflow-hidden mt-4`}
+          >
+            {teknisis.length === 0 ? (
+              <div className="p-8 text-center">
+                <svg
+                  className="w-16 h-16 mx-auto text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">#{index + 1}</span>
-                    <div className="flex space-x-3">
-                      {/* Detail */}
-                      <Link
-                        href={`/teknisi/${teknisi.id}`}
-                        className={`p-2 rounded-full transition-colors ${
-                          theme === "dark"
-                            ? "text-indigo-400 hover:bg-indigo-900/30"
-                            : "text-indigo-600 hover:bg-indigo-100"
-                        }`}
-                        title="Detail"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <h3 className="mt-4 text-lg font-medium">
+                  Tidak ada data teknisi
+                </h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  Tambahkan teknisi baru dengan menekan tombol "Tambah Teknisi"
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3 p-3">
+                {currentItems.map((teknisi, index) => (
+                  <div
+                    key={teknisi.id}
+                    className={`w-full p-4 rounded-lg ${
+                      theme === "dark" ? "bg-gray-700" : "bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium">
+                        #{indexOfFirstItem + index + 1}
+                      </span>
+                      <div className="flex space-x-3">
+                        {/* Detail */}
+                        <Link
+                          href={`/teknisi/${teknisi.id}`}
+                          className={`p-2 rounded-full transition-colors ${
+                            theme === "dark"
+                              ? "text-indigo-400 hover:bg-indigo-900/30"
+                              : "text-indigo-600 hover:bg-indigo-100"
+                          }`}
+                          title="Detail"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </Link>
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </Link>
 
-                      {/* Edit */}
-                      <Link
-                        href={`/teknisi/edit/${teknisi.id}`}
-                        className={`p-2 rounded-full transition-colors ${
-                          theme === "dark"
-                            ? "text-yellow-400 hover:bg-yellow-900/30"
-                            : "text-yellow-600 hover:bg-yellow-100"
-                        }`}
-                        title="Edit"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
+                        {/* Edit */}
+                        <Link
+                          href={`/teknisi/edit/${teknisi.id}`}
+                          className={`p-2 rounded-full transition-colors ${
+                            theme === "dark"
+                              ? "text-yellow-400 hover:bg-yellow-900/30"
+                              : "text-yellow-600 hover:bg-yellow-100"
+                          }`}
+                          title="Edit"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </Link>
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </Link>
 
-                      {/* Hapus */}
-                      <button
-                        onClick={() => setDeleteConfirm(teknisi)}
-                        className={`p-2 rounded-full transition-colors ${
-                          theme === "dark"
-                            ? "text-red-400 hover:bg-red-900/30"
-                            : "text-red-600 hover:bg-red-100"
-                        }`}
-                        title="Hapus"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
+                        {/* Hapus */}
+                        <button
+                          onClick={() => setDeleteConfirm(teknisi)}
+                          className={`p-2 rounded-full transition-colors ${
+                            theme === "dark"
+                              ? "text-red-400 hover:bg-red-900/30"
+                              : "text-red-600 hover:bg-red-100"
+                          }`}
+                          title="Hapus"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
+                    <p className="text-base font-semibold truncate">
+                      {teknisi.nama}
+                    </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {teknisi.jurusan}
+                    </p>
                   </div>
-                  <p className="text-base font-semibold">{teknisi.nama}</p>
-                  <p className="text-sm text-gray-500">{teknisi.jurusan}</p>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination untuk mobile */}
+            {teknisis.length > itemsPerPage && (
+              <div
+                className={`p-4 border-t ${
+                  theme === "dark" ? "border-gray-700" : "border-gray-200"
+                }`}
+              >
+                <div className="flex flex-col items-center space-y-4">
+                  <div
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Menampilkan {indexOfFirstItem + 1} sampai{" "}
+                    {Math.min(indexOfLastItem, teknisis.length)} dari{" "}
+                    {teknisis.length} data
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === 1
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:bg-blue-500 hover:text-white"
+                      } ${
+                        theme === "dark"
+                          ? "bg-gray-700 text-gray-300"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Sebelumnya
+                    </button>
+
+                    <span className="px-3 py-1 rounded-md bg-blue-500 text-white">
+                      {currentPage}
+                    </span>
+
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === totalPages
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:bg-blue-500 hover:text-white"
+                      } ${
+                        theme === "dark"
+                          ? "bg-gray-700 text-gray-300"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Selanjutnya
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         </main>
         <Footer />

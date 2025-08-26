@@ -1,5 +1,6 @@
 import { DarkModeProvider } from "@/components/DarkModeContext";
 import "./globals.css";
+import ScrollbarStyle from "@/components/ScrollbarStyle";
 
 export const metadata = {
   title: "Admin Dashboard",

@@ -347,6 +347,23 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, title, onLogout }) => {
                   </select>
                 </div>
               </div>
+
+              {/* Logout Button in Sidebar */}
+              <div className="mt-8">
+                <button
+                  onClick={onLogout}
+                  className={`w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl 
+      transition-all duration-300 shadow-md hover:shadow-lg
+      ${
+        theme === "dark"
+          ? "bg-red-600 hover:bg-red-700 text-white"
+          : "bg-red-500 hover:bg-red-600 text-white"
+      }`}
+                >
+                  <FiLogOut className="w-5 h-5" />
+                  <span className="text-sm font-medium">Logout</span>
+                </button>
+              </div>
             </div>
           </div>
         </>
