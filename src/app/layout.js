@@ -1,6 +1,6 @@
 import { DarkModeProvider } from "@/components/DarkModeContext";
-import "./globals.css";
 import ScrollbarStyle from "@/components/ScrollbarStyle";
+import "./globals.css";
 
 export const metadata = {
   title: "Admin Dashboard",
@@ -12,6 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="min-h-screen">
         <DarkModeProvider>
+          <ScrollbarStyle /> {/* ✅ Tambahkan */}
           {children}
         </DarkModeProvider>
       </body>

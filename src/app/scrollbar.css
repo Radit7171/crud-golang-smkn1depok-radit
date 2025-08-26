@@ -1,0 +1,35 @@
+/* scrollbar.css */
+html.light::-webkit-scrollbar {
+  width: 8px;
+}
+
+html.light::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+html.light::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+html.light::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Mode Dark */
+html.dark::-webkit-scrollbar {
+  width: 8px;
+}
+
+html.dark::-webkit-scrollbar-track {
+  background: #1f2937; /* abu-abu gelap */
+}
+
+html.dark::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+html.dark::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

@@ -7,7 +7,6 @@ export const DarkModeProvider = ({ children }) => {
   const [theme, setTheme] = useState("light");
 
   useEffect(() => {
-    // ambil preferensi user dari localStorage
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       setTheme(savedTheme);
@@ -19,7 +18,6 @@ export const DarkModeProvider = ({ children }) => {
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
-
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
 
