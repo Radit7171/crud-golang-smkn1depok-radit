@@ -14,6 +14,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     setMounted(true);
   }, []);
 
+  // cegah scroll horizontal saat sidebar buka
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflowX = "hidden";
+    } else {
+      document.body.style.overflowX = "";
+    }
+  }, [isOpen]);
+
   if (!mounted) return null;
 
   const menuItems = [
@@ -79,8 +88,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <div
         className={`
           fixed lg:static inset-y-0 left-0 z-30
-          h-screen
-          w-64 shadow-xl lg:shadow-md
+          h-screen w-64 max-w-full
+          shadow-xl lg:shadow-md
           transform transition-transform duration-300 ease-in-out
           flex flex-col
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}

@@ -104,16 +104,15 @@ export default function Dashboard() {
       <div
         className={`fixed inset-y-0 left-0 transform ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 z-40`}
+        } transition-transform duration-300 ease-in-out w-64 z-60`}
       >
         <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       </div>
 
       {/* Konten utama */}
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        }`}
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300
+    ${sidebarOpen ? "md:ml-64" : "md:ml-0"}`}
       >
         {/* Navbar */}
         <Navbar
@@ -124,7 +123,7 @@ export default function Dashboard() {
         />
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
           {/* Header dan Tombol Tambah */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
@@ -215,7 +214,7 @@ export default function Dashboard() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full divide-y">
                   <thead
                     className={theme === "dark" ? "bg-gray-700" : "bg-gray-50"}
@@ -342,6 +341,102 @@ export default function Dashboard() {
                 </table>
               </div>
             )}
+            {/* Card view untuk mobile */}
+            <div className="space-y-4 md:hidden">
+              {teknisis.map((teknisi, index) => (
+                <div
+                  key={teknisi.id}
+                  className={`p-4 rounded-lg shadow ${
+                    theme === "dark" ? "bg-gray-800" : "bg-white"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">#{index + 1}</span>
+                    <div className="flex space-x-3">
+                      {/* Detail */}
+                      <Link
+                        href={`/teknisi/${teknisi.id}`}
+                        className={`p-2 rounded-full transition-colors ${
+                          theme === "dark"
+                            ? "text-indigo-400 hover:bg-indigo-900/30"
+                            : "text-indigo-600 hover:bg-indigo-100"
+                        }`}
+                        title="Detail"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </Link>
+
+                      {/* Edit */}
+                      <Link
+                        href={`/teknisi/edit/${teknisi.id}`}
+                        className={`p-2 rounded-full transition-colors ${
+                          theme === "dark"
+                            ? "text-yellow-400 hover:bg-yellow-900/30"
+                            : "text-yellow-600 hover:bg-yellow-100"
+                        }`}
+                        title="Edit"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                      </Link>
+
+                      {/* Hapus */}
+                      <button
+                        onClick={() => setDeleteConfirm(teknisi)}
+                        className={`p-2 rounded-full transition-colors ${
+                          theme === "dark"
+                            ? "text-red-400 hover:bg-red-900/30"
+                            : "text-red-600 hover:bg-red-100"
+                        }`}
+                        title="Hapus"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-base font-semibold">{teknisi.nama}</p>
+                  <p className="text-sm text-gray-500">{teknisi.jurusan}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </main>
         <Footer />
@@ -351,9 +446,8 @@ export default function Dashboard() {
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div
-            className={`w-full max-w-md p-6 rounded-xl shadow-2xl ${
-              theme === "dark" ? "bg-gray-800" : "bg-white"
-            }`}
+            className={`w-full max-w-md p-6 rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto
+    ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}
           >
             <h3
               className={`text-lg font-semibold mb-2 ${

@@ -10,7 +10,7 @@ import {
   FiSettings,
   FiUser,
   FiBell,
-  FiStar
+  FiStar,
 } from "react-icons/fi";
 import { useState, useEffect } from "react";
 
@@ -46,15 +46,16 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, title, onLogout }) => {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 
-          ${isScrolled ? "shadow-lg" : "shadow-md"}
-          ${
-            theme === "dark"
-              ? "bg-gray-900 border-b border-gray-800"
-              : "bg-white border-b border-gray-200"
-          }`}
+        className={`sticky top-0 z-50 w-full transition-all duration-300 
+    ${isScrolled ? "shadow-lg" : "shadow-md"}
+    ${
+      theme === "dark"
+        ? "bg-gray-900 border-b border-gray-800"
+        : "bg-white border-b border-gray-200"
+    }`}
+        style={{ maxWidth: "100vw" }} // cegah overflow
       >
-        <div className="flex items-center justify-between p-4 md:px-6">
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6">
           {/* Left: toggle sidebar + title */}
           <div className="flex items-center space-x-3">
             <button
@@ -76,10 +77,12 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, title, onLogout }) => {
               </div>
             </button>
 
-            <h1 className='text-xl md:text-2xl font-bold transition-all duration-300 ${
+            <h1
+              className='text-xl md:text-2xl font-bold transition-all duration-300 ${
                   theme === "dark"
                     ? "text-gray-200 hover:bg-gray-800"
-                    : "text-gray-700 hover:bg-gray-100"'>
+                    : "text-gray-700 hover:bg-gray-100"'
+            >
               {title}
             </h1>
           </div>
