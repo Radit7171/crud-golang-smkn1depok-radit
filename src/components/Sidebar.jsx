@@ -10,11 +10,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [mounted, setMounted] = useState(false);
   const { theme } = useDarkMode();
 
+  // state submenu
+  const [openMenus, setOpenMenus] = useState({});
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // cegah scroll horizontal saat sidebar buka
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflowX = "hidden";
@@ -25,70 +27,110 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   if (!mounted) return null;
 
-  const menuItems = [
+  // struktur menu mirip Nowa
+  const menuGroups = [
     {
-      href: "/dashboard",
-      label: "Dashboard",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      ),
+      category: "Main",
+      items: [
+        {
+          href: "/teknisi/tampil",
+          label: "Dashboard",
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="side-menu__icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13zm7 7v-5h4v5h-4zm2-15.586 6 6V15l.001 5H16v-5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v5H6v-9.586l6-6z" />
+            </svg>
+          ),
+        },
+      ],
     },
     {
-      href: "/teknisi/tampil",
-      label: "Teknisi",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-      ),
+      category: "Management",
+      items: [
+        {
+          label: "Teknisi",
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="side-menu__icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm9 11v-1a7 7 0 0 0-7-7h-4a7 7 0 0 0-7 7v1h2v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1z" />
+            </svg>
+          ),
+          children: [
+            { href: "/teknisi/tampil", label: "Data Teknisi" },
+            { href: "/teknisi/tambah", label: "Tambah Teknisi" },
+          ],
+        },
+        // {
+        //   label: "Sparepart",
+        //   icon: (
+        //     <svg
+        //       xmlns="http://www.w3.org/2000/svg"
+        //       className="side-menu__icon"
+        //       width="24"
+        //       height="24"
+        //       viewBox="0 0 24 24"
+        //     >
+        //       <path d="M20 6h-4V4c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v2H4c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V8c0-1.103-.897-2-2-2zM4 18V8h4v10H4zm6 0V8h4v10h-4zm10 0h-4V8h4v10zm-6-12V4h4v2h-4z" />
+        //     </svg>
+        //   ),
+        //   children: [
+        //     { href: "/sparepart/tampil", label: "Data Sparepart" },
+        //     { href: "/sparepart/tambah", label: "Tambah Sparepart" },
+        //   ],
+        // },
+      ],
     },
+    // {
+    //   category: "General",
+    //   items: [
+    //     {
+    //       href: "/settings",
+    //       label: "Settings",
+    //       icon: (
+    //         <svg
+    //           xmlns="http://www.w3.org/2000/svg"
+    //           className="side-menu__icon"
+    //           width="24"
+    //           height="24"
+    //           viewBox="0 0 24 24"
+    //         >
+    //           <path d="M12 16a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0-6a2 2 0 1 1-2 2 2 2 0 0 1 2-2zm8-4h-2.101a7.027 7.027 0 0 0-1.274-2.567l1.487-1.487a1 1 0 1 0-1.414-1.414L15.211 2.1A7.021 7.021 0 0 0 12 1c-.862 0-1.696.156-2.479.447L8.101.039A1 1 0 0 0 6.687 1.453l1.487 1.487A7.027 7.027 0 0 0 6.9 5.507C5.277 5.832 4 7.265 4 9a1 1 0 0 0 1 1h2.101a7.027 7.027 0 0 0 1.274 2.567L6.888 14.04a1 1 0 1 0 1.414 1.414L9.789 13.9A7.04 7.04 0 0 0 12 15c.862 0 1.696-.156 2.479-.447l1.42 1.413a1 1 0 0 0 1.414-1.414l-1.487-1.487A7.027 7.027 0 0 0 17.1 10H20a1 1 0 0 0 1-1c0-1.735-1.277-3.168-2.9-3.493z" />
+    //         </svg>
+    //       ),
+    //     },
+    //   ],
+    // },
   ];
+
+  const toggleMenu = (label) => {
+    setOpenMenus((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
 
   return (
     <>
       {/* Overlay untuk mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          className="fixed inset-0 bg-opacity-50 z-20 lg:hidden"
           onClick={toggleSidebar}
         />
       )}
 
       {/* Sidebar */}
-      <div
+      <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-30
-          h-screen w-64 max-w-full
+          h-screen w-50 max-w-full
           shadow-xl lg:shadow-md
           transform transition-transform duration-300 ease-in-out
           flex flex-col
@@ -100,145 +142,129 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           }
         `}
       >
-        {/* Logo dan judul */}
-        <div
-          className={`
-            flex items-center justify-between p-5 border-b
-            ${
-              theme === "dark"
-                ? "border-gray-700 bg-gray-800"
-                : "border-gray-200 bg-gray-50"
-            }
-          `}
-        >
-          <div className="flex items-center space-x-3">
-            <div
-              className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                theme === "dark" ? "bg-blue-600" : "bg-blue-500"
-              } text-white`}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h1
-                className={`text-lg font-bold ${
-                  theme === "dark" ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Bengkel SMKN 1 Depok
-              </h1>
-              <p
-                className={`text-xs ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                Management System
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={toggleSidebar}
-            className={`lg:hidden rounded-full p-1 ${
-              theme === "dark"
-                ? "text-gray-400 hover:bg-gray-700 hover:text-gray-300"
-                : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"
-            }`}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+        {/* Header */}
+        <div className="main-sidebar-header text-center p-2 border-b border-gray-200 dark:border-gray-700">
+          <a href="/teknisi/tampil" className="header-logo flex items-center">
+            <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+              Bengkel SMKN 1 Depok
+            </span>
+          </a>
         </div>
 
-        {/* Menu Navigasi */}
-        <nav className="flex-1 overflow-y-auto py-6 px-3">
-          <div
-            className={`text-xs font-semibold uppercase mb-2 pl-3 ${
-              theme === "dark" ? "text-gray-500" : "text-gray-400"
-            }`}
-          >
-            Menu Utama
-          </div>
-          <ul className="space-y-2">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`
-                      flex items-center px-4 py-3 rounded-lg transition-all duration-200
-                      ${
-                        isActive
-                          ? theme === "dark"
-                            ? "bg-blue-800 text-white shadow-lg"
-                            : "bg-blue-100 text-blue-700 shadow-md"
-                          : theme === "dark"
-                          ? "hover:bg-gray-800 text-gray-300"
-                          : "hover:bg-gray-100 text-gray-700"
-                      }
-                    `}
-                    onClick={() => window.innerWidth < 1024 && toggleSidebar()}
-                  >
-                    <span className={`mr-3 ${isActive ? "text-blue-400" : ""}`}>
-                      {item.icon}
+        {/* Menu */}
+        <div className="main-sidebar flex-1 overflow-y-auto">
+          <nav className="main-menu-container nav nav-pills flex-column sub-open py-0.5">
+            <ul className="main-menu space-y-1">
+              {menuGroups.map((group) => (
+                <div key={group.category}>
+                  {/* Category Title */}
+                  <li className="slide__category px-4 py-2">
+                    <span className="category-name text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
+                      {group.category}
                     </span>
-                    <span className="font-medium">{item.label}</span>
-                    {isActive && (
-                      <span className="ml-auto w-2 h-2 rounded-full bg-blue-500"></span>
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+                  </li>
+
+                  {/* Menu Items */}
+                  {group.items.map((item) => {
+                    const isActive = pathname === item.href;
+                    const hasChildren =
+                      item.children && item.children.length > 0;
+
+                    return (
+                      <li key={item.label} className="slide has-sub">
+                        {hasChildren ? (
+                          <>
+                            <button
+                              onClick={() => toggleMenu(item.label)}
+                              className={`side-menu__item flex items-center w-full px-4 py-3 rounded-md transition-colors ${
+                                openMenus[item.label]
+                                  ? "bg-blue-50"
+                                  : "hover:bg-gray-100"
+                              }`}
+                            >
+                              <span className="side-menu__icon mr-3">
+                                {item.icon}
+                              </span>
+                              <span className="side-menu__label flex-1 text-left">
+                                {item.label}
+                              </span>
+                              <svg
+                                className={`w-4 h-4 transition-transform ${
+                                  openMenus[item.label] ? "rotate-90" : ""
+                                }`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </button>
+
+                            {/* Submenu */}
+                            {openMenus[item.label] && (
+                              <ul className="slide-menu child1 ml-4 pl-6 border-l border-gray-200 mt-1 space-y-1">
+                                {item.children.map((child) => {
+                                  const isChildActive = pathname === child.href;
+                                  return (
+                                    <li key={child.href} className="slide">
+                                      <Link
+                                        href={child.href}
+                                        className={`side-menu__item block px-3 py-2 rounded-md text-sm transition-colors ${
+                                          isChildActive
+                                            ? "bg-blue-100"
+                                            : "hover:bg-gray-100"
+                                        }`}
+                                      >
+                                        {child.label}
+                                      </Link>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            )}
+                          </>
+                        ) : (
+                          <Link
+                            href={item.href}
+                            className={`side-menu__item flex items-center px-4 py-3 rounded-md transition-colors ${
+                              isActive
+                                ? "bg-blue-100"
+                                : "hover:bg-gray-100"
+                            }`}
+                          >
+                            <span className="side-menu__icon mr-3">
+                              {item.icon}
+                            </span>
+                            <span className="side-menu__label">
+                              {item.label}
+                            </span>
+                          </Link>
+                        )}
+                      </li>
+                    );
+                  })}
+                </div>
+              ))}
+            </ul>
+          </nav>
+        </div>
 
         {/* Footer */}
         <div
-          className={`
-            p-4 border-t text-xs text-center
-            ${
-              theme === "dark"
-                ? "border-gray-700 text-gray-400 bg-gray-800"
-                : "border-gray-200 text-gray-500 bg-gray-50"
-            }
-          `}
+          className={`p-1.5 border-t text-xs text-center ${
+            theme === "dark"
+              ? "border-gray-700 text-gray-400 bg-gray-800"
+              : "border-gray-200 text-gray-500 bg-gray-50"
+          }`}
         >
-          <p>© {new Date().getFullYear()} Bengkel SMKN 1 Depok</p>
-          <p className="mt-1">All rights reserved</p>
+          © {new Date().getFullYear()} Bengkel SMKN 1 Depok
         </div>
-      </div>
+      </aside>
     </>
   );
 };
