@@ -143,7 +143,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         `}
       >
         {/* Header */}
-        <div className="main-sidebar-header text-center p-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="main-sidebar-header text-center p-1 border-b border-gray-200 dark:border-gray-700">
           <a href="/teknisi/tampil" className="header-logo flex items-center">
             <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
               Bengkel SMKN 1 Depok
@@ -152,7 +152,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         </div>
 
         {/* Menu */}
-        <div className="main-sidebar flex-1 overflow-y-auto">
+        <div className="main-sidebar p-2 flex-1 overflow-y-auto">
           <nav className="main-menu-container nav nav-pills flex-column sub-open py-0.5">
             <ul className="main-menu space-y-1">
               {menuGroups.map((group) => (

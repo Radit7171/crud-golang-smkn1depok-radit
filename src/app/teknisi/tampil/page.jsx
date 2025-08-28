@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import useDarkMode from "@/components/DarkModeContext";
 import Footer from "@/components/Footer";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function Dashboard() {
   const [teknisis, setTeknisis] = useState([]);
@@ -20,6 +22,7 @@ export default function Dashboard() {
   const itemsPerPage = 8;
   const router = useRouter();
   const { theme } = useDarkMode();
+  const tableRef = useRef(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -101,6 +104,72 @@ export default function Dashboard() {
     router.push("/login");
   };
 
+  // Function to export table to PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(14);
+    doc.text("Daftar Teknisi", 14, 15);
+
+    // Add subtle line under title
+    doc.setDrawColor(200);
+    doc.line(14, 18, 196, 18);
+
+    // Table
+    autoTable(doc, {
+      head: [["No", "Nama", "Jurusan"]],
+      body: sortedData.map((teknisi, index) => [
+        index + 1,
+        teknisi.nama,
+        teknisi.jurusan,
+      ]),
+      startY: 25,
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [66, 135, 245], // biru modern
+        textColor: [255, 255, 255],
+        halign: "center",
+      },
+      bodyStyles: {
+        halign: "center",
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245], // abu tipis
+      },
+      tableLineColor: [220, 220, 220],
+      tableLineWidth: 0.2,
+    });
+
+    // Footer (page number & date)
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+
+      // Page number
+      doc.text(
+        `Halaman ${i} dari ${pageCount}`,
+        doc.internal.pageSize.getWidth() - 40,
+        doc.internal.pageSize.getHeight() - 10
+      );
+
+      // Date
+      doc.text(
+        `Exported: ${new Date().toLocaleDateString("id-ID")}`,
+        14,
+        doc.internal.pageSize.getHeight() - 10
+      );
+    }
+
+    // Save PDF
+    doc.save("daftar-teknisi.pdf");
+  };
+
   if (isLoading) {
     return (
       <div
@@ -126,7 +195,7 @@ export default function Dashboard() {
       <div
         className={`fixed inset-y-0 left-0 transform ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 z-60`}
+        } transition-transform duration-300 ease-in-out w-50 z-60`}
       >
         <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       </div>
@@ -134,7 +203,7 @@ export default function Dashboard() {
       {/* Konten utama */}
       <div
         className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
-          sidebarOpen ? "md:ml-64" : "md:ml-0"
+          sidebarOpen ? "md:ml-50" : "md:ml-0"
         }`}
       >
         {/* Navbar */}
@@ -147,84 +216,22 @@ export default function Dashboard() {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
-          {/* Header dan Tombol Tambah */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-            <div>
-              <h1 className="text-xl font-semibold">Daftar Teknisi</h1>
-              <p
-                className={`text-xs ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {sortedData.length} teknisi terdaftar dalam sistem
-              </p>
-            </div>
-            <Link
-              href="/teknisi/tambah"
-              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-3 rounded-md inline-flex items-center transition-colors"
-            >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-              Tambah Teknisi
-            </Link>
-          </div>
-
-          {error && (
+          {/* Card Statistik */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {/* Total Teknisi Card */}
             <div
-              className={`px-3 py-2 rounded-md mb-4 flex items-center text-sm ${
-                theme === "dark"
-                  ? "bg-red-900/30 border border-red-800 text-red-200"
-                  : "bg-red-100 border border-red-200 text-red-700"
+              className={`rounded-lg p-4 shadow-sm ${
+                theme === "dark" ? "bg-gray-800" : "bg-white"
               }`}
             >
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {error}
-            </div>
-          )}
-
-          {/* Card untuk data */}
-          <div
-            className={`rounded-lg overflow-hidden ${
-              theme === "dark" ? "bg-gray-800" : "bg-white"
-            } shadow-sm border ${
-              theme === "dark" ? "border-gray-700" : "border-gray-200"
-            }`}
-          >
-            {/* Header dengan pencarian dan filter */}
-            <div
-              className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b gap-3 ${
-                theme === "dark" ? "border-gray-700" : "border-gray-200"
-              }`}
-            >
-              <div className="relative w-full sm:w-64">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <div className="flex items-center">
+                <div
+                  className={`rounded-full p-3 ${
+                    theme === "dark" ? "bg-blue-900/30" : "bg-blue-100"
+                  }`}
+                >
                   <svg
-                    className="w-4 h-4 text-gray-400"
+                    className="w-6 h-6 text-blue-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -234,48 +241,291 @@ export default function Dashboard() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                     />
                   </svg>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Cari teknisi..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`pl-10 pr-3 py-2 w-full text-sm rounded-md border ${
-                    theme === "dark"
-                      ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                  }`}
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <span
-                  className={`text-sm ${
-                    theme === "dark" ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  Urutkan:
-                </span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className={`text-sm rounded-md border px-2 py-2 ${
-                    theme === "dark"
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-300 text-gray-900"
-                  }`}
-                >
-                  <option value="newest">Terbaru</option>
-                  <option value="name">Nama A-Z</option>
-                </select>
+                <div className="ml-4">
+                  <p
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    Total Teknisi
+                  </p>
+                  <p className="text-2xl font-bold">{teknisis.length}</p>
+                </div>
               </div>
             </div>
 
+            {/* Teknisi Aktif Card */}
+            <div
+              className={`rounded-lg p-4 shadow-sm ${
+                theme === "dark" ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div className="flex items-center">
+                <div
+                  className={`rounded-full p-3 ${
+                    theme === "dark" ? "bg-green-900/30" : "bg-green-100"
+                  }`}
+                >
+                  <svg
+                    className="w-6 h-6 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    Teknisi Aktif
+                  </p>
+                  <p className="text-2xl font-bold">{teknisis.length}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Jurusan Card */}
+            <div
+              className={`rounded-lg p-4 shadow-sm ${
+                theme === "dark" ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div className="flex items-center">
+                <div
+                  className={`rounded-full p-3 ${
+                    theme === "dark" ? "bg-purple-900/30" : "bg-purple-100"
+                  }`}
+                >
+                  <svg
+                    className="w-6 h-6 text-purple-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    Jumlah Jurusan
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {new Set(teknisis.map((t) => t.jurusan)).size}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Rata-rata Card */}
+            <div
+              className={`rounded-lg p-4 shadow-sm ${
+                theme === "dark" ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div className="flex items-center">
+                <div
+                  className={`rounded-full p-3 ${
+                    theme === "dark" ? "bg-yellow-900/30" : "bg-yellow-100"
+                  }`}
+                >
+                  <svg
+                    className="w-6 h-6 text-yellow-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p
+                    className={`text-sm font-medium ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    Rata-rata per Halaman
+                  </p>
+                  <p className="text-2xl font-bold">{itemsPerPage}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card untuk data */}
+          <div
+            className={`rounded-lg overflow-hidden ${
+              theme === "dark" ? "bg-gray-800" : "bg-white"
+            } shadow-sm border ${
+              theme === "dark" ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
+            {/* Header dengan pencarian, filter, dan tombol aksi */}
+            <div
+              className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b gap-3 ${
+                theme === "dark" ? "border-gray-700" : "border-gray-200"
+              }`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
+                <div className="relative w-full sm:w-64">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg
+                      className="w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Cari teknisi..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={`pl-10 pr-3 py-2 w-full text-sm rounded-md border ${
+                      theme === "dark"
+                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                    }`}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <span
+                    className={`text-sm ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    Urutkan:
+                  </span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className={`text-sm rounded-md border px-2 py-2 ${
+                      theme === "dark"
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
+                  >
+                    <option value="newest">Terbaru</option>
+                    <option value="name">Nama A-Z</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 w-full sm:w-auto justify-center">
+                <button
+                  onClick={exportToPDF}
+                  className={`flex items-center gap-2 px-2 py-2 rounded-md text-xs font-medium transition-colors
+                  ${
+                    theme === "dark"
+                      ? "bg-gray-700 hover:bg-gray-600 text-white"
+                      : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+                  }`}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Export
+                </button>
+
+                <Link
+                  href="/teknisi/tambah"
+                  className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-2 py-2 rounded-md inline-flex items-center gap-1 transition-colors"
+                >
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  Tambah
+                </Link>
+              </div>
+            </div>
+
+            {/* Informasi jumlah data */}
+            <div
+              className={`px-4 py-2 border-b ${
+                theme === "dark"
+                  ? "border-gray-700 bg-gray-750"
+                  : "border-gray-200 bg-gray-50"
+              }`}
+            >
+              <p
+                className={`text-xs ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                Menampilkan {Math.min(sortedData.length, 1)}-
+                {Math.min(indexOfLastItem, sortedData.length)} dari{" "}
+                {sortedData.length} teknisi
+              </p>
+            </div>
+
             {/* Tabel Teknisi (Desktop) */}
-            <div className="hidden md:block p-10">
+            <div className="hidden md:block">
               {sortedData.length === 0 ? (
                 <div className="p-8 text-center">
                   <svg
@@ -303,8 +553,9 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full border dark:border-gray-700">
+                  {/* tabel */}
+                  <div className="overflow-x-auto px-16 py-5" ref={tableRef}>
+                    <table className="w-full border border-gray-200 dark:border-gray-700">
                       <thead
                         className={
                           theme === "dark" ? "bg-gray-750" : "bg-gray-50"
@@ -316,6 +567,8 @@ export default function Dashboard() {
                               key={head}
                               className={`px-4 py-3 text-center border text-xs font-medium uppercase tracking-wider ${
                                 theme === "dark"
+                                  ? "border-gray-700 text-gray-400"
+                                  : "border-gray-200 text-gray-600"
                               }`}
                             >
                               {head}
@@ -323,7 +576,8 @@ export default function Dashboard() {
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y text-center divide-gray-200 dark:divide-gray-700">
+
+                      <tbody>
                         {currentItems.map((teknisi, index) => (
                           <tr
                             key={teknisi.id}
@@ -333,21 +587,49 @@ export default function Dashboard() {
                                 : "hover:bg-gray-50"
                             }
                           >
-                            <td className="px-4 border py-3 whitespace-nowrap">
-                              <div className="text-sm font-medium">
+                            <td
+                              className={`px-4 py-3 text-center border ${
+                                theme === "dark"
+                                  ? "border-gray-700"
+                                  : "border-gray-200"
+                              }`}
+                            >
+                              <span className="text-sm font-medium">
                                 {indexOfFirstItem + index + 1}
-                              </div>
+                              </span>
                             </td>
-                            <td className="px-4 border py-3 whitespace-nowrap">
-                              <div className="text-sm font-medium">
+
+                            <td
+                              className={`px-4 py-3 text-center border ${
+                                theme === "dark"
+                                  ? "border-gray-700"
+                                  : "border-gray-200"
+                              }`}
+                            >
+                              <span className="text-sm font-medium">
                                 {teknisi.nama}
-                              </div>
+                              </span>
                             </td>
-                            <td className="px-4 border py-3 whitespace-nowrap">
-                              <div className="text-sm">{teknisi.jurusan}</div>
+
+                            <td
+                              className={`px-4 py-3 text-center border ${
+                                theme === "dark"
+                                  ? "border-gray-700"
+                                  : "border-gray-200"
+                              }`}
+                            >
+                              <span className="text-sm">{teknisi.jurusan}</span>
                             </td>
-                            <td className="px-4 py-3 border whitespace-nowrap text-center">
+
+                            <td
+                              className={`px-4 py-3 text-center border ${
+                                theme === "dark"
+                                  ? "border-gray-700"
+                                  : "border-gray-200"
+                              }`}
+                            >
                               <div className="flex justify-center items-center space-x-2">
+                                {/* Detail */}
                                 <Link
                                   href={`/teknisi/${teknisi.id}`}
                                   className={`p-1.5 rounded-md transition-colors ${
@@ -362,7 +644,6 @@ export default function Dashboard() {
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       strokeLinecap="round"
@@ -372,6 +653,8 @@ export default function Dashboard() {
                                     />
                                   </svg>
                                 </Link>
+
+                                {/* Edit */}
                                 <Link
                                   href={`/teknisi/edit/${teknisi.id}`}
                                   className={`p-1.5 rounded-md transition-colors ${
@@ -386,7 +669,6 @@ export default function Dashboard() {
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       strokeLinecap="round"
@@ -396,6 +678,8 @@ export default function Dashboard() {
                                     />
                                   </svg>
                                 </Link>
+
+                                {/* Hapus */}
                                 <button
                                   onClick={() => setDeleteConfirm(teknisi)}
                                   className={`p-1.5 rounded-md transition-colors ${
@@ -410,7 +694,6 @@ export default function Dashboard() {
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
                                       strokeLinecap="round"
